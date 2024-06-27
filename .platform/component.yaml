@@ -5,23 +5,17 @@ metadata:
   environment:
     cluster_type: ec2
     domain: vkpr.platform.vee.codes
-    ingress_type: kong  
+    ingress_type: kong
+    public_ip: 34.231.125.112
   annotations:
     github.com/project-slug: veecode-homolog/cluster-otlp-teste-3
     backstage.io/techdocs-ref: dir:..
     github.com/workflows: terraform-deploy.yml,start-instance.yml,stop-instance.yml,kubeconfig.yml,terraform-destroy.yml,deploy-dashboard
     grafana/dashboard-selector: cluster-otlp-teste-3
     grafana/alert-label-selector: "alertname=cluster-otlp-teste-3"
-    cluster/instructions: |
-      ssh -i ./key-pair.pem -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} 
-      "mkdir -p .kube && k3d kubeconfig get ${CLUSTER_NAME} > ~/.kube/config"
-      scp -i ./key-pair.pem ${EC2_USER}@${EC2_HOST}:~/.kube/config ./config
-      yq e 'del(.clusters[0].cluster.certificate-authority-data)' -i ~/.kube/config
-      yq e '.clusters[0].cluster.insecure-skip-tls-verify=true' config -i
-      yq e '.clusters[0].cluster.server = "https://${EC2_HOST}:38517"' config -i
+    cluster/instructions: "# Run the following commands to import the kubeconfig:\n  ssh -i ./cert.pem -o StrictHostKeyChecking=no $USERNAME@$34.231.125.112 \"mkdir -p .kube && k3d kubeconfig get k3s > ~/.kube/config\"\n  scp -i ./cert.pem $USERNAME@$34.231.125.112:~/.kube/config ~/.kube/config-cluster-otlp-teste-3\n  yq -e 'del(.clusters[0].cluster.certificate-authority-data) | .clusters[0].cluster.insecure-skip-tls-verify=true | .clusters[].cluster.server |= sub(\"0.0.0.0\", \"34.231.125.112\")' -i ~/.kube/config-cluster-otlp-teste-3\n  export KUBECONFIG=~/.kube/config-cluster-otlp-teste-3\n  kubectl get pods -A\n"
 spec:
   type: ec2
   lifecycle: experimental
   owner: "group:default/admin"
   environment: 'environment:default/platform_homolog_environment'
-  
