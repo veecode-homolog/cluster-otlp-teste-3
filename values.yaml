@@ -1,0 +1,36 @@
+values:
+    ### Enviroment Settings
+    environment: platform_homolog_environment
+    ### Project Settings
+    cluster_name: cluster-otlp-teste-3
+    owner: group:default/admin
+    instance_type: m5.large
+    volume_size: 30
+    keypair_name: platform_kp
+    ### Network Settings
+    vpc_id: vpc-051721395ecf1f7aa
+    domain: vkpr.platform.vee.codes
+    hostedZoneId: Z08737613ML5F3HE67WJ3
+    subnet_id: subnet-04dda6147dd9410f1
+    ### Ingress Settings
+    ingress_window: true
+    ingress_type: kong
+    kong_mode: standard
+    external_db: false
+    basic_auth: true
+    certmanager_window: true
+    issuer_type: staging
+    email: email@sample.com
+    ### Terraform Backend Settings
+    terraformStateBucketName: veecode-homolog-terraform-state
+    terraformStateBucketRegion: us-east-1
+    infracost: false
+    ### Publish Settings
+    host: github.com
+    destination: veecode-homolog/cluster-otlp-teste-3
+    specPublish: ${{ parameters.specPublish | parseRepoUrl | pick('owner') }}/${{ parameters.specPublish | parseRepoUrl | pick('repo') }}
+    specPublishRepo: ${{ parameters.specPublish | parseRepoUrl | pick('repo') }}
+    specPublishBranch: 
+    ### Observability Settings
+    observability_window: true
+    observability_grafana_url: https://grafana.apr.vee.codes

@@ -1,0 +1,7 @@
+---
+cluster_name: "cluster-otlp-teste-3"
+VPC_ID: "vpc-051721395ecf1f7aa"
+SUBNET_ID: "subnet-04dda6147dd9410f1"
+instance_type: "m5.large"
+keypair: "platform_kp"
+volume_size: "30"

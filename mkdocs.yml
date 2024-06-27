@@ -1,0 +1,8 @@
+site_name: cluster-otlp-teste-3
+site_description: Cluster EC2 made with Platform Template.
+
+nav:
+  - Introduction: index.md
+
+plugins:
+  - techdocs-core
