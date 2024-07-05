@@ -50,7 +50,7 @@ curl -sS https://webinstall.dev/k9s | bash
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.27.7/2023-11-02/bin/linux/amd64/kubectl
 chmod +x ./kubectl && mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$HOME/bin:$PATH
-k3d cluster create k3s --servers 1 -p "80:80@loadbalancer" -p "443:443@loadbalancer" --api-port 6550  --k3s-arg "--disable=traefik@server:*" --kubeconfig-update-default
+k3d cluster create k3s --servers 1 -p "80:80@loadbalancer" -p "443:443@loadbalancer" --api-port 6550 -p 30000-30004:30000-30004 --k3s-arg "--disable=traefik@server:*" --kubeconfig-update-default
 sleep 2
 
 helm repo add metallb https://metallb.github.io/metallb
