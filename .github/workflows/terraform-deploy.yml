@@ -255,10 +255,6 @@ jobs:
                     exporters: [otlp/jaeger]
           EOF
 
-      - name: Configure Kong OpenTelemetry plugin
-        run: |
-          kubectl apply -f kong-opentelemetry.yaml    
-
       - name: Apply OpenTelemetry auto-instrumentation
         run: |
           sleep 5        
@@ -271,6 +267,9 @@ jobs:
           alias vkpr="rit vkpr"
           vkpr apply --path_to_file="$(pwd)/vkpr.yaml"
 
+      - name: Configure Kong OpenTelemetry plugin
+        run: |
+          kubectl apply -f kong-opentelemetry.yaml
             
       # Getting the UID from datasources
       - name: Getting uid from Prometheus datasource
