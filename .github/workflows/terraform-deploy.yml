@@ -5,6 +5,8 @@ on:
 env:
   PORT: 6550
   USERNAME: ec2-user
+  INSTRUMENTATION_NAMESPACE: vkpr
+
 jobs:
   apply:
     runs-on: ubuntu-latest
@@ -97,7 +99,6 @@ jobs:
           CERTIFICATE=`cat  ~/.kube/config |grep certificate-authority-data `
           sed -i "s|$CERTIFICATE|    insecure-skip-tls-verify: true|g" ~/.kube/config
           sed -i "s|0.0.0.0|${{ env.Host }}|g" ~/.kube/config
-
  
       - name: Upload kube config
         uses: actions/upload-artifact@v3
@@ -133,6 +134,7 @@ jobs:
           commit_author: veecode-bot<github-admin@vee.codes>
           commit_message: "Update catalog-info.yaml with RDS endpoint"
           push_options: '--force'
+
   vkpr-apply:
     runs-on: ubuntu-latest
     needs: kubeconfig
@@ -191,6 +193,76 @@ jobs:
         with:
           name: kube-config
           path: ~/.kube
+
+      - name: Add OpenTelemetry Helm repository
+        run: |
+          helm repo add opentelemetry-helm https://open-telemetry.github.io/opentelemetry-helm-charts
+          helm repo update
+
+      - name: Install OpenTelemetry Collector
+        run: |
+          helm upgrade --install opentelemetry-operator opentelemetry-helm/opentelemetry-operator --wait --version 0.63.1 -n vkpr --create-namespace \
+            --set manager.collectorImage.repository=otel/opentelemetry-collector-k8s \
+            --set admissionWebhooks.certManager.enabled=false \
+            --set admissionWebhooks.autoGenerateCert.enabled=true  
+
+      - name: Add Jaeger Helm repository
+        run: |
+          helm repo add jaeger-all-in-one https://raw.githubusercontent.com/hansehe/jaeger-all-in-one/master/helm/charts
+          helm repo update
+
+      - name: Install Jaeger
+        run: |
+          helm upgrade --install jaeger-all-in-one jaeger-all-in-one/jaeger-all-in-one --wait --version 0.1.12 -n vkpr \
+            --set enableHttpOpenTelemetryCollector=true
+
+      - name: Apply OpenTelemetry Collector configuration
+        run: |
+          sleep 5
+          kubectl apply -f - <<EOF
+          apiVersion: opentelemetry.io/v1beta1
+          kind: OpenTelemetryCollector
+          metadata:
+            name: otel
+            namespace: vkpr
+          spec:
+            config:
+              receivers:
+                otlp:
+                  protocols:
+                    grpc:
+                      endpoint: 0.0.0.0:4317
+                    http:
+                      endpoint: 0.0.0.0:4318
+              processors:
+                memory_limiter:
+                  check_interval: 1s
+                  limit_percentage: 75
+                  spike_limit_percentage: 15
+                batch:
+                  send_batch_size: 10000
+                  timeout: 10s
+              exporters:
+                otlp/jaeger:
+                  endpoint: jaeger-all-in-one.vkpr:4317
+                  tls:
+                    insecure: true
+              service:
+                pipelines:
+                  traces:
+                    receivers: [otlp]
+                    processors: [memory_limiter, batch]
+                    exporters: [otlp/jaeger]
+          EOF
+
+      - name: Configure Kong OpenTelemetry plugin
+        run: |
+          kubectl apply -f kong-opentelemetry.yaml    
+
+      - name: Apply OpenTelemetry auto-instrumentation
+        run: |
+          sleep 5        
+          kubectl apply -f instrumentation.yaml -n $INSTRUMENTATION_NAMESPACE            
 
     ### Provisionamento (Prometheus with remote write)
       - name: Vkpr apply

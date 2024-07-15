@@ -21,16 +21,27 @@ kong:
       tracing_instrumentations: all
       tracing_sampling_rate: 1.0
   metrics: true  
+
+# OBSERVABILITY
 prometheus-stack:
-  enabled: true
+  enabled: true    
+  metrics: true
+  alertManager:
+    enabled: true
   helmArgs:
+    grafana:
+      additionalDataSources:
+      - name: Jaeger
+        type: jaeger
+        url: http://jaeger-all-in-one.vkpr:16686
     prometheus:
       prometheusSpec:
+        scrapeInterval: 10s
         enableRemoteWriteReceiver: true
         remoteWrite:
         - name: prometheus-central
           sendExemplars: true
-          url: http://prometheus.apr.vee.codes/api/v1/write
+          url: https://prometheus.apr.vee.codes/api/v1/write
           writeRelabelConfigs:
           - regex: (.+)
             # replacement: Will be filled in the pipeline ex.: platform_xpto_$1 
@@ -39,4 +50,7 @@ prometheus-stack:
             targetLabel: __name__
         externalLabels:
           cluster: cluster-otlp-teste-3
-          # replacement:   Will be filled in the pipeline ex.: xpto
+          # replacement:   Will be filled in the pipeline ex.: xpto  
+loki:
+  enabled: true    
+  metrics: true
