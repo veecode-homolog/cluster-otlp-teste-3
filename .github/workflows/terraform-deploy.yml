@@ -215,6 +215,7 @@ jobs:
         run: |
           helm upgrade --install jaeger-all-in-one jaeger-all-in-one/jaeger-all-in-one --wait --version 0.1.12 -n vkpr \
             --set enableHttpOpenTelemetryCollector=true
+          kubectl apply -f jaeger-service-nodeport-all-in-one.yaml -n vkpr
 
       - name: Apply OpenTelemetry Collector configuration
         run: |
@@ -266,6 +267,8 @@ jobs:
           shopt -s expand_aliases
           alias vkpr="rit vkpr"
           vkpr apply --path_to_file="$(pwd)/vkpr.yaml"
+          kubectl apply -f loki-nodeport-service.yaml -n vkpr
+          kubectl apply -f prometheus-nodeport-service.yaml -n vkpr
 
       - name: Configure Kong OpenTelemetry plugin
         run: |
