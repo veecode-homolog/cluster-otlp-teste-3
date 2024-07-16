@@ -51,35 +51,35 @@ resource "aws_security_group" "web_security_group" {
     description = "NODEPORT from 30000"
     from_port   = 30000
     to_port     = 30000
-    protocol    = "-1"
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
     }
   ingress {
     description = "NODEPORT from 30001"
     from_port   = 30001
     to_port     = 30001
-    protocol    = "-1"
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
     }
   ingress {
     description = "NODEPORT from 30002"
     from_port   = 30002
     to_port     = 30002
-    protocol    = "-1"
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
     }         
   ingress {
     description = "NODEPORT from 30003"
     from_port   = 30003
     to_port     = 30003
-    protocol    = "-1"
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
     }  
   ingress {
     description = "NODEPORT from 30004"
     from_port   = 30004
     to_port     = 30004
-    protocol    = "-1"
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
     }          
   egress {
